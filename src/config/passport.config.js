@@ -11,7 +11,7 @@ const LocalStrategy = local.Strategy;
 const initializePassport = () => {
     passport.use('register', new LocalStrategy(
         {passReqToCallback:true, usernameField:'email'}, 
-        async (req,username, password, done) =>{
+        async (req, username, password, done) =>{
             const { firstName, lastName, email, age } = req.body;
             try {
                 const user = await userModel.findOne({email:username}); 

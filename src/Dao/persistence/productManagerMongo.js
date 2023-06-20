@@ -30,4 +30,8 @@ export default class ProductManagerMongo {
         const product = await productModel.updateOne({ _id: idProduct }, { $set: updateData });
         await product.save();
     };
+    async productsFindLean(){
+        const products = await productModel.find().lean();
+        return products;
+    };
 };

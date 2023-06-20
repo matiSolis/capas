@@ -1,8 +1,8 @@
 import { Router } from "express";
-import productModel from "../Dao/models/products.model.js";
-import ViewsManagerMongo from "../Dao/persistence/viewsManagerMongo.js";
+import ViewsController from "../controllers/views.controllers.js";
 
 const router = Router();
+const viewsController = new ViewsController();
 
 const adminSession = (req, res, next) => {
     if(req.session.user.role !== 'Admin'){
@@ -19,49 +19,17 @@ const privateAcces = (req,res,next)=>{
     next();
 };
 //router admin
-router.get('/', privateAcces, async (req, res) => {
-        if(req.session.user.role ==='Admin'){
-            return res.redirect('/admin');
-        }else{
-            await ViewsManagerMongo.homeRender(req, res);
-        };
-    });
-router.get('/admin', adminSession, async (req, res) => {
-        try {
-            const products = await productModel.find().lean();
-            res.render('admin', { user: req.session.user, products });
-        } catch (error) {
-            console.error(error);
-            res.status(500).send({
-                status: 'Error',
-                msg: 'Error del servidor.',
-            });
-        };
-    });
+router.get('/', privateAcces, viewsController.homeRender);
+router.get('/admin', adminSession, viewsController.adminRender);
 //router profile lo ven todos admin o user
-router.get('/profile', privateAcces ,(req,res)=>{
-        res.render('profile',{
-            user: req.session.user
-        });
-    });
+router.get('/profile', privateAcces ,viewsController.profileRender);
 //router users
-router.get('/carts/:cid', privateAcces, async (req, res) => {
-        await ViewsManagerMongo.cartRender(req, res);
-    });
-router.get('/product/:pid', privateAcces, async (req, res) => {
-        await ViewsManagerMongo.productRender(req, res);
-    });
-router.get('/products', privateAcces, async (req, res) => {
-        await ViewsManagerMongo.productsRender(req, res);
-    });
+router.get('/carts/:cid', privateAcces, viewsController.cartRender);
+router.get('/product/:pid', privateAcces, viewsController.productRender);
+router.get('/products', privateAcces, viewsController.productsRender);
 //router registro y logueo
-router.get('/register', publicAcces, (req,res)=>{
-        res.render('register');
-    });
-router.get('/login', publicAcces, (req,res)=>{
-        res.render('login');
-    });
-
+router.get('/register', publicAcces, viewsController.registerRender);
+router.get('/login', publicAcces, viewsController.loginRender);
 
 export default router;
 

@@ -12,7 +12,7 @@ export default class UserManagerMongo {
             throw new Error("Faltan datos");
         };
         const user = {firstName, lastName, email, password, cartId};
-        const result = await userModel.createUser(user);
+        const result = await userModel.create(user);
         return result;
     }
 }

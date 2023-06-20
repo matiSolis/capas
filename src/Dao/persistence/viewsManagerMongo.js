@@ -1,7 +1,7 @@
 import cartModel from "../models/cart.model.js";
 import productModel from "../models/products.model.js";
 
-export default class viewsManagerMongo{
+export default class ViewsManagerMongo{
     static async homeRender(req, res) {
         const { page = 1, limit, query } = req.query;
         const opt = { page, limit: parseInt(limit) || 6, lean: true };
