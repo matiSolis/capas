@@ -1,41 +1,16 @@
 import { Router } from "express";
 import passport from "passport";
+import SessionController from "../controllers/session.controllers.js";
 
 const router = Router();
+const sessionController = new SessionController();
 
-router.post('/register', passport.authenticate('register', { failureRedirect:'/failregister'} ),async (req, res) =>{
-    res.send({status:"succes", message:"User registered"});
-});
-router.get('/failregister', async (req,res)=>{
-    console.log('Fallo en el registro');
-    res.send({error: 'Error en el registro'})
-});
-router.post('/login', passport.authenticate('login', {failureRedirect:'/faillogin'}),async (req, res) => {
-    if(!req.user) return res.status(400).send({status:"error", error: 'Invalid credentials'});
-    req.session.user = {
-        firsName : req.user.firsName,
-        lastName: req.user.lastName,
-        age: req.user.age,
-        email: req.user.email
-    };
-    res.send({status:"succes", payload:req.res.user, message:"Logueo de usuario exitoso."});
-});
-router.get('/faillogin', async (req, res) => {
-    console.log('Fallo en el ingreso')
-    res.status(400).send({error:'Error en el ingreso.'})
-});
-router.get('/logout', (req,res)=>{
-    req.session.destroy(err =>{
-        if(err) return res.status(500).send({status:"error", error:"No pudo cerrar sesion"});
-        res.redirect('/login');
-    });
-});
-router.get('/github', passport.authenticate('github', {scope:['user:email']}), async (req, res)=>{
-
-});
-router.get('/githubcallback', passport.authenticate('github', {failureRedirect: '/login'}), async (req, res)=>{
-    req.session.user = req.user;
-    res.redirect('/');
-})
+router.post('/register', passport.authenticate('register', { failureRedirect:'/failregister'} ), sessionController.register);
+router.get('/failregister', sessionController.failRegister);
+router.post('/login', passport.authenticate('login', {failureRedirect:'/faillogin'}), sessionController.login);
+router.get('/faillogin', sessionController.failLogin);
+router.get('/logout', sessionController.logout);
+router.get('/github', passport.authenticate('github', {scope:['user:email']}), sessionController.github);
+router.get('/githubcallback', passport.authenticate('github', {failureRedirect: '/login'}), sessionController.githubCallbacks)
 
 export default router;
