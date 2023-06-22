@@ -5,6 +5,8 @@ import handlebars from "express-handlebars";
 import passport from "passport";
 import mongoose from "mongoose";
 //imports propios
+import "./config/dbConnection.js";
+import { options } from "./config/options.js";
 import __dirname from "./utils.js";
 import cartRouter from "./routes/cart.router.js";
 import productRouter from "./routes/product.router.js";
@@ -13,20 +15,18 @@ import adminRouter from "./routes/admin.router.js";
 import viewsRouter  from "./routes/views.router.js";
 import initializePassport from "./config/passport.config.js";
 
-const MONGO = 'mongodb+srv://solismatiasn:sarasacoco@cluster0.2g9gvye.mongodb.net/ecommerce?retryWrites=true&w=majority';
-const PORT = process.env.PORT || 8080;
+export const PORT = options.server.port;
 const app = express();
-const conection = mongoose.connect(MONGO);
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(__dirname+'/public'));
 app.use(session({
     store: new MongoStore({
-        mongoUrl: MONGO,
+        mongoUrl: options.mongoDB.url,
         ttl:3600
     }),
-    secret: 'CoderSecret',
+    secret: options.server.secretSession,
     resave: false,
     saveUninitialized: false
 }));

@@ -1,20 +1,51 @@
+import CartController from "./cart.controllers.js";
+import passport from "passport";
+
+const cartController = new CartController();
 export default class SessionController {
     async register (req, res) {
-        res.send({status:"succes", message:"User registered"});
+        try {
+            const user = req.user;
+            const cartResult = await CartController.createNewCart();
+            user.cart = cartResult._id;
+            await user.save();
+            res.send({ status: 'success', message: 'User registered' });
+        } catch (error) {
+            console.log('Error en el registro:', error);
+            res.send({ error: 'Error en el registro' });
+        };
     };
     async failRegister (req, res) {
         console.log('Fallo en el registro');
         res.send({error: 'Error en el registro'})
     };
-    async login (req, res) {
-        if(!req.user) return res.status(400).send({status:"error", error: 'Invalid credentials'});
-        req.session.user = {
-            firsName : req.user.firsName,
-            lastName: req.user.lastName,
-            age: req.user.age,
-            email: req.user.email
-        };
-        res.send({status:"succes", payload:req.res.user, message:"Logueo de usuario exitoso."});
+    async login(req, res, next) {
+        passport.authenticate('login', (err, user) => {
+            if (err) {
+                return res.status(500).send({ status: 'error', error: 'Error en el servidor' });
+            };
+            if (!user) {
+                return res.status(400).send({ status: 'error', error: 'Credenciales inválidas' });
+            };
+            req.logIn(user, (err) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send({ status: 'error', error: 'Error en el servidor' });
+                };
+                req.session.user = {
+                first_name: user.first_name,
+                last_name: user.last_name,
+                age: user.age,
+                email: user.email,
+                role: user.role,
+                };
+                if (user.role === 'admin') {
+                    return res.redirect('/admin');
+                } else {
+                    return res.send({ status: 'success', payload: user, message: 'Primer logueo!!' });
+                };
+            });
+        })(req, res, next);
     };
     async failLogin (req, res) {
         console.log('Fallo en el ingreso')
@@ -26,7 +57,9 @@ export default class SessionController {
             res.redirect('/login');
         });
     };
-    async github (req, res) {};
+    async github (req, res) {
+        passport.authenticate('github', { scope: ['user:email'] })(req, res, next);
+    };
     async githubCallbacks (req, res) {
         req.session.user = req.user;
         res.redirect('/');

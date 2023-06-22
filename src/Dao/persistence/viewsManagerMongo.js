@@ -2,7 +2,7 @@ import cartModel from "../models/cart.model.js";
 import productModel from "../models/products.model.js";
 
 export default class ViewsManagerMongo{
-    static async homeRender(req, res) {
+    async homeRender(req, res) {
         const { page = 1, limit, query } = req.query;
         const opt = { page, limit: parseInt(limit) || 6, lean: true };
         opt.sort = { price: -1 };
@@ -23,7 +23,7 @@ export default class ViewsManagerMongo{
             products
         });
     };
-    static async cartRender(req, res) {
+    async cartRender(req, res) {
         const { cid } = req.params;
         try {
             const cart = await cartModel.findById(cid).populate("products.product").lean();
@@ -41,7 +41,7 @@ export default class ViewsManagerMongo{
             });
         };
     };
-    static async productRender(req, res) {
+    async productRender(req, res) {
         try {
             const idProduct = req.params.pid;
             const product = await productModel.findById(idProduct).lean();    
@@ -57,7 +57,7 @@ export default class ViewsManagerMongo{
             });
         };
     };
-    static async productsRender(req, res) {
+    async productsRender(req, res) {
         try {
             let { page = 1, limit, query, sort, category } = req.query;
             const opt = { page, limit: parseInt(limit) || 4, lean: true };
